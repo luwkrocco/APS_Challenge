@@ -1,0 +1,12 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "System.Alerts.Monitor.Common.Protos";
+
+package system_alert_service;
+
+message SystemAlert {
+    string Datetime = 1;
+    string SystemName = 2;
+    string AlertType = 3;
+    string FurtherDetails = 4;
+}

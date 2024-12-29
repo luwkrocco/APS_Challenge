@@ -1,0 +1,8 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "System.Alerts.Monitor.Common.Protos";
+
+package system_alert_service;
+
+message Empty {}
+message BoolResponse { bool result = 1; }

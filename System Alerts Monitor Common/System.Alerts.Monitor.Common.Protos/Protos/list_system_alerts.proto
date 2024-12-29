@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "System.Alerts.Monitor.Common.Protos";
+
+package system_alert_service;
+
+import "system_alert.proto";
+
+message ListSystemAlertsRequest{
+    string from = 1;
+    string to = 2;
+    optional string system = 3;
+}
+
+message ListSystemAlertsResponse {
+    string status = 1;
+    repeated SystemAlert system_alerts = 2;
+    optional string error = 3;
+}

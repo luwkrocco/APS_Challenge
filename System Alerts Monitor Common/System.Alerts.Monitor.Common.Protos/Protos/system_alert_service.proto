@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "System.Alerts.Monitor.Common.Protos";
+
+package system_alert_service;
+
+import "list_system_alerts.proto";
+import "refresh_sqlite.proto";
+
+service SystemAlertService {
+    rpc ListSystemAlerts (ListSystemAlertsRequest) returns (ListSystemAlertsResponse);
+    rpc RefreshSQLITE(Empty) returns (BoolResponse);
+}
+

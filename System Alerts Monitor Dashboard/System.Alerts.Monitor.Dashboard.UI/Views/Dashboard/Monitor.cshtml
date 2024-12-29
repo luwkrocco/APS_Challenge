@@ -1,0 +1,439 @@
+﻿@using System.Alerts.Monitor.Common
+@model MonitoringData
+
+@{
+    ViewData["Title"] = "Monitoring Dashboard";
+}
+
+<div class="container-fluid">
+    
+    <!-- Filter Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" id="filterHeader">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                            Toggle Filter
+                        </button>
+                    </h5>
+                </div>
+                <div id="filterCollapse" class="collapse" aria-labelledby="filterHeader">
+                    <div class="card-body">
+                    <form id="filterForm" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="fromDate" class="form-label">From Date</label>
+                                <input type="date" class="form-control" id="fromDate" value="@Model.From.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="toDate" class="form-label">To Date</label>
+                                <input type="date" class="form-control" id="toDate" value="@Model.To.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="systemNameFilter" class="form-label">System Name</label>
+                            <select id="systemNameFilter" class="form-select">
+                                <option value="ALL">All Systems</option>
+                                <!-- System options will be dynamically inserted here -->
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Apply Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Part: Latest System Status -->
+    <div class="row mb-4">
+        <h2>Latest System Status</h2>
+        <div id="systemAlertTypeWidgets" class="d-flex flex-wrap justify-content-start">
+        </div>
+    </div>
+
+    <!-- Mid Part: Last 5 Message per System -->
+    <div class="row mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Top 5 Messages per System</h2>
+            <div class="btn-group" role="group" aria-label="Sort toggle">
+                <button type="button" class="btn btn-outline-primary active" id="sortByDatetime">Sort by Datetime</button>
+                <button type="button" class="btn btn-outline-primary" id="sortByStatus">Sort by Status</button>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="accordion" id="top5MessagesAccordion">
+                    <!-- Accordion items will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Part: Message Log -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Message Log</h2>
+                        <div class="form-group">
+                            <label for="systemFilter" class="me-2">Filter by System:</label>
+                            <select id="systemFilter" class="form-select">
+                                <option value="ALL">All Systems</option>
+                                <!-- System options will be dynamically inserted here -->
+                            </select>
+                        </div>
+                    </div>
+                    <pre id="messageLog" style="max-height: 300px; overflow-y: auto;">
+                        <!-- Message log will be dynamically inserted here -->
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying message details -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Message Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Message details will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        var CurrentSortCriteria = 'Datetime'; // Datetime or AlertType
+
+        function ShowModalMessage(datetime, system, status, message) {
+            var modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            var modalBody = document.getElementById('messageModalBody');
+            modalBody.innerHTML = `
+                                <p><strong>System Name:</strong> ${system}</p>
+                                <p><strong>Reported At:</strong> ${getFormattedDate(datetime)}</p>
+                                <p><strong>Status:</strong> <span class="badge bg-${getAlertTypeColor(status)}">${status}</span> </p>
+                                <p><strong>Details:</strong> ${message}</p>
+                            `;
+            modal.show();
+        }
+
+        function getFormattedDate(inputDateTime) {
+            var datetime = new Date(inputDateTime);
+            var day = String(datetime.getDate()).padStart(2, "0");
+            var month = String(datetime.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+            var year = datetime.getFullYear();
+            var hours = String(datetime.getHours()).padStart(2, "0");
+            var minutes = String(datetime.getMinutes()).padStart(2, "0");
+            var seconds = String(datetime.getSeconds()).padStart(2, "0");
+
+            const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+            return formattedDate;
+        }
+
+        function getAlertTypeColor(AlertType) {
+            switch (AlertType) {
+                case 'OK': return 'success';
+                case 'WARNING': return 'warning';
+                case 'ERROR': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        // Parse the monitoring data
+        var monitoringData = @Json.Serialize(Model.AlertData);
+        var logData = @Json.Serialize(Model.AlertData);
+        var systems = {};
+
+        function Init(refresh = false) {
+
+            //INIT DATA
+            if (!refresh) systems = {};
+
+            // Process data for system AlertType widgets
+            monitoringData = SortData(monitoringData);
+            monitoringData
+                //.sort((a, b) => a.SystemName.localeCompare(b.SystemName))
+                .forEach(function (data) {
+                    if (!systems[data.SystemName]) {
+                        systems[data.SystemName] = {
+                            latestAlertType: data.AlertType,
+                            latestDatetime: data.Datetime,
+                            latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
+                        };
+                    } else if (new Date(data.Datetime) > new Date(systems[data.SystemName].latestDatetime)) {
+                        systems[data.SystemName] = {
+                            latestAlertType: data.AlertType,
+                            latestDatetime: data.Datetime,
+                            latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
+                        };
+                    }
+                });
+
+            // INIT SECTIONS
+            InitFilter();
+            InitTop();
+            InitMid();
+            InitLow();
+        }
+
+
+        function InitFilter() {
+            // Populate system filter dropdowns
+            var systemNameFilter = document.getElementById('systemNameFilter');
+            systemNameFilter.innerHTML = '';
+
+            var systemFilter = document.getElementById('systemFilter');
+            systemFilter.innerHTML = '';
+
+            // ALL OPTION
+            var optionAll = document.createElement('option');
+                optionAll.value = 'ALL';
+                optionAll.textContent = 'ALL';
+                systemNameFilter.appendChild(optionAll);;
+                systemFilter.appendChild(optionAll.cloneNode(true));
+
+            //SYSTEM ENTRIES
+            Object.keys(systems).forEach(function (system) {
+                var option1 = document.createElement('option');
+                option1.value = system;
+                option1.textContent = system;
+                systemNameFilter.appendChild(option1);
+
+                var option2 = option1.cloneNode(true);
+                systemFilter.appendChild(option2);
+            });
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // TOP PART LOGIC
+
+        function InitTop() {
+            // Render system AlertType widgets
+            var systemAlertTypeWidgets = document.getElementById('systemAlertTypeWidgets');
+            systemAlertTypeWidgets.innerHTML = '';
+
+            Object.keys(systems).forEach(function (system) {
+                var widget = document.createElement('div');
+                widget.className = 'card m-2';
+                widget.style.width = '200px';
+                widget.innerHTML = `
+                                        <div class="card-body">
+                                            <h5 class="card-title">${system}</h5>
+                                            <p class="card-text">
+                                                <span>${getFormattedDate(systems[system].latestDatetime)}</span>
+                                                <br/>
+                                                <span class="badge bg-${getAlertTypeColor(systems[system].latestAlertType)}">
+                                                    ${systems[system].latestAlertType}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    `;
+                widget.addEventListener('click', function () { ShowModalMessage(systems[system].latestDatetime, system, systems[system].latestAlertType, systems[system].latestMessage); });
+                systemAlertTypeWidgets.appendChild(widget);
+            });
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // MIDDLE PART LOGIC
+
+        function InitMid() {
+            // Process and render top 5 messages per system
+            var top5MessagesAccordion = document.getElementById('top5MessagesAccordion');
+            top5MessagesAccordion.innerHTML = '';
+
+            var messagesBySystem = {};
+
+            monitoringData.forEach(function (data) {
+                if (!messagesBySystem[data.SystemName]) {
+                    messagesBySystem[data.SystemName] = [];
+                }
+                messagesBySystem[data.SystemName].push(data);
+            });
+
+            Object.keys(messagesBySystem).forEach(function (system, index) {
+                var systemMessages = messagesBySystem[system];
+                //systemMessages.sort((a, b) => new Date(b.Datetime) - new Date(a.Datetime));
+                systemMessages = SortData(systemMessages);
+
+                var accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+                accordionItem.innerHTML = `
+                                <h2 class="accordion-header" id="heading${index}">
+                                    <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${index}">
+                                        ${system}
+                                    </button>
+                                </h2>
+                                <div id="collapse${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" aria-labelledby="heading${index}" data-bs-parent="#top5MessagesAccordion">
+                                    <div class="accordion-body">
+                                                <table class="table table-hover">
+                                            <thead>
+                                                <tr class="">
+                                                    <th class="col-2">Reported At</th>
+                                                    <th class="col-2">Status</th>
+                                                    <th class="col-8">Details</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            `;
+
+                var tbody = accordionItem.querySelector('tbody');
+
+                systemMessages.slice(0, 5).forEach(function (message, index) {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                                    <td>${getFormattedDate(message.Datetime)}</td>
+                                    <td><span class="badge bg-${getAlertTypeColor(message.AlertType)}">${message.AlertType}</span></td>
+                                    <td>${message.FurtherDetails}</td>
+                                `;
+                    row.style.cursor = 'pointer';
+                    row.addEventListener('click', function () { ShowModalMessage(message.Datetime, message.SystemName, message.AlertType, message.FurtherDetails); });
+                    tbody.appendChild(row);
+                });
+
+                top5MessagesAccordion.appendChild(accordionItem);
+            });
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // BOTTOM PART LOGIC
+
+        function InitLow() {
+            // Render message log
+            var messageLog = document.getElementById('messageLog');
+
+            function renderMessageLog(filter = 'ALL') {
+                messageLog.innerHTML = ''; // Clear existing log
+                logData.forEach(function (data) {
+                    if (filter === 'ALL' || data.SystemName === filter) {
+                        var logEntry = document.createElement('div');
+                        logEntry.textContent = `${getFormattedDate(data.Datetime)} - ${data.SystemName} - ${data.AlertType}: ${data.FurtherDetails}`;
+                        messageLog.appendChild(logEntry);
+                    }
+                });
+            }
+
+            // Initial render of message log
+            renderMessageLog();
+
+            // Add event listener for system filter
+            systemFilter.addEventListener('change', function () {
+                renderMessageLog(this.value);
+            });
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // FILTER LOGIC
+
+        // Function to fetch filtered data from the server
+        async function FetchFilteredData(filter) {
+            try {
+                const response = await fetch('/Dashboard/FilterData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(filter),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching filtered data:', error);
+                throw error;
+            }
+        }
+
+        // Add event listener for filter form
+        document.getElementById('filterForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var fromDate = document.getElementById('fromDate').value;
+            var toDate = document.getElementById('toDate').value;
+            var systemName = document.getElementById('systemNameFilter').value;
+
+            var filter = {
+                FromDate: fromDate,
+                ToDate: toDate,
+                SystemName: systemName
+            };
+
+            try 
+            {
+                var filteredData = await FetchFilteredData(filter);
+                logData = monitoringData = filteredData.AlertData;
+                Init(true);
+            }
+            catch (error) {
+                console.error('Error fetching filtered data:', error);
+            }
+        });
+
+        Init(false);
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        // SORTING LOGIC
+
+        function SortData(data) {
+            const statusOrder = { 'ERROR': -1, 'WARNING': 0, 'OK': 1 };
+            switch (CurrentSortCriteria) {
+                case 'Datetime':
+                    data.sort((a, b) => //new Date(b.Datetime) - new Date(a.Datetime));
+                    {
+                        // 1. Sort by SystemName
+                        const nameComparison = a.SystemName.localeCompare(b.SystemName);
+                        if (nameComparison !== 0) { return nameComparison; }
+
+                        // 2. If SystemNames are the same, sort by Datetime (descending)
+                        return new Date(b.Datetime) - new Date(a.Datetime);
+                    });
+                    break;
+                case 'AlertType':
+                    data.sort((a, b) => //statusOrder[a.AlertType.toLowerCase()] - statusOrder[b.AlertType.toLowerCase()]);
+                    {
+                        // 1. Sort by SystemName
+                        const nameComparison = a.SystemName.localeCompare(b.SystemName);
+                        if (nameComparison !== 0) { return nameComparison; }
+
+                        // 2. If SystemNames are the same, sort by Datetime (descending)
+                        return statusOrder[a.AlertType.toUpperCase()] - statusOrder[b.AlertType.toUpperCase()];
+                    });
+                    break;
+            }
+            return data;
+            }
+
+            function UpdateSortButtons(activeCriteria) {
+                document.getElementById('sortByDatetime').classList.toggle('active', activeCriteria === 'Datetime');
+                document.getElementById('sortByStatus').classList.toggle('active', activeCriteria === 'AlertType');
+            }
+
+            document.getElementById('sortByDatetime').addEventListener('click', function () {
+                CurrentSortCriteria = 'Datetime';
+                UpdateSortButtons(CurrentSortCriteria);
+                Init(false);
+            });
+
+            document.getElementById('sortByStatus').addEventListener('click', function () {
+                CurrentSortCriteria = 'AlertType';
+                UpdateSortButtons(CurrentSortCriteria);
+                Init(false);
+            });
+
+    </script>
+}
+
