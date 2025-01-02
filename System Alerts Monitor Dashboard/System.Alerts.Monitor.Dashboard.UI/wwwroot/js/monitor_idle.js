@@ -16,14 +16,14 @@ function resetIdleTimer() {
 
     if (idleState) {
         // If the user was previously idle, they are now active
-        console.log("User is now ACTIVE");
+        //console.log("User is now ACTIVE");
         idleState = false;
     }
 }
 
 function goIdle() {
     idleState = true;
-    console.log("User is now IDLE");
+    //console.log("User is now IDLE");
 
     // Dislpay Refreshing Toast
     ShowNotification('Refreshing Data.');

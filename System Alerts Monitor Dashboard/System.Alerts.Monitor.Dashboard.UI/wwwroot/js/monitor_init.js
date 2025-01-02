@@ -2,35 +2,40 @@
 var systems = {};
 
 function Init(refresh = false) {
+    try {
+        //INIT DATA
+        if (refresh) systems = {};
 
-    //INIT DATA
-    if (refresh) systems = {};
+        // Process data for system AlertType widgets
+        monitoringData = SortData(monitoringData);
+        monitoringData
+            //.sort((a, b) => a.SystemName.localeCompare(b.SystemName))
+            .forEach(function (data) {
+                if (!systems[data.SystemName]) {
+                    systems[data.SystemName] = {
+                        latestAlertType: data.AlertType,
+                        latestDatetime: data.Datetime,
+                        latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
+                    };
+                } else if (new Date(data.Datetime) > new Date(systems[data.SystemName].latestDatetime)) {
+                    systems[data.SystemName] = {
+                        latestAlertType: data.AlertType,
+                        latestDatetime: data.Datetime,
+                        latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
+                    };
+                }
+            });
 
-    // Process data for system AlertType widgets
-    monitoringData = SortData(monitoringData);
-    monitoringData
-        //.sort((a, b) => a.SystemName.localeCompare(b.SystemName))
-        .forEach(function (data) {
-            if (!systems[data.SystemName]) {
-                systems[data.SystemName] = {
-                    latestAlertType: data.AlertType,
-                    latestDatetime: data.Datetime,
-                    latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
-                };
-            } else if (new Date(data.Datetime) > new Date(systems[data.SystemName].latestDatetime)) {
-                systems[data.SystemName] = {
-                    latestAlertType: data.AlertType,
-                    latestDatetime: data.Datetime,
-                    latestMessage: data.FurtherDetails//`${data.SystemName}: ${data.FurtherDetails} - ${data.AlertType}`
-                };
-            }
-        });
-
-    // INIT SECTIONS
-    InitFilter();
-    InitTop();
-    InitMid();
-    InitLow();
+        // INIT SECTIONS
+        InitFilter();
+        InitTop();
+        InitMid();
+        InitLow();
+    }
+    catch (error) {
+        console.error('Error during INIT:', error);
+        ShowNotification(error, true);
+    }
 }
 
 function InitFilter() {
@@ -170,14 +175,21 @@ function InitLow() {
     var messageLog = document.getElementById('messageLog');
 
     function renderMessageLog(filter = 'ALL') {
-        messageLog.innerHTML = ''; // Clear existing log
-        logData.forEach(function (data) {
-            if (filter === 'ALL' || data.SystemName === filter) {
-                var logEntry = document.createElement('div');
-                logEntry.textContent = `${GetFormattedDate(data.Datetime)} - ${data.SystemName} - ${data.AlertType}: ${data.FurtherDetails}`;
-                messageLog.appendChild(logEntry);
-            }
-        });
+        try {
+            messageLog.innerHTML = ''; // Clear existing log
+            logData = logData ?? [];
+            logData.forEach(function (data) {
+                if (filter === 'ALL' || data.SystemName === filter) {
+                    var logEntry = document.createElement('div');
+                    logEntry.textContent = `${GetFormattedDate(data.Datetime)} - ${data.SystemName} - ${data.AlertType}: ${data.FurtherDetails}`;
+                    messageLog.appendChild(logEntry);
+                }
+            });
+        }
+        catch (error) {
+            console.error('Error rendering Message Log:', error);
+            ShowNotification(error, true);
+        }
     }
 
     // Initial render of message log

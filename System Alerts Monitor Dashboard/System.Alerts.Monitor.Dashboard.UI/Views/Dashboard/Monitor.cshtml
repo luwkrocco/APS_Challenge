@@ -122,15 +122,28 @@
     </div>
 </div>
 
+<div class="toast-container text-danger position-fixed top-0 end-0 p-3">
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="etoast-body" class="toast-body">
+            Error Data.
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/monitor_init.js"></script>
     <script src="~/js/monitor_utils.js"></script>
     <script src="~/js/monitor_idle.js"></script>
     <script src="~/js/monitor_events.js"></script>
     <script>
-        var monitoringData = @Json.Serialize(Model.AlertData);
-        var logData = @Json.Serialize(Model.AlertData);
-        Init(false);
+        var adata = @Json.Serialize(Model.AlertData);
+        adata = (adata ?? []);
+
+        var monitoringData = adata;
+        var logData = adata;
+
+        if (adata.length > 0) Init(false);
+        else ShowNotification("No Data retrieved from Server. <br/>Please check with the System Admin.");
     </script>
 }
 

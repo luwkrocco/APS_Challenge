@@ -31,6 +31,8 @@ function GetAlertTypeColor(AlertType) {
 var CurrentSortCriteria = 'Datetime'; // Datetime or AlertType
 
 function SortData(data) {
+    data = data ?? [];
+
     const statusOrder = { 'ERROR': -1, 'WARNING': 0, 'OK': 1 };
     switch (CurrentSortCriteria) {
         case 'Datetime':
@@ -80,11 +82,15 @@ async function CallFetchFilterAndRefresh() {
 
     try {
         var filteredData = await FetchFilteredData(filter);
-        logData = monitoringData = filteredData.AlertData;
-        Init(true);
+        var fdata = filteredData.AlertData ?? [];
+        logData = monitoringData = fdata;
+
+        if (fdata.length > 0) Init(true);
+        else ShowNotification("No Data retrieved from Server. <br/>Please check with the System Admin.");
     }
     catch (error) {
         console.error('Error fetching filtered data:', error);
+        ShowNotification(error, true);
     }
 }
 
@@ -147,7 +153,7 @@ async function ExportData(e) {
             document.body.removeChild(link);
             ShowNotification(`CSV for ${system} has been downloaded`);
         } else {
-            ShowNotification(`Unable to download CSV for ${system}`);
+            ShowNotification(`Unable to download CSV for ${system}`, true);
         }
     }
     catch (error) {
@@ -176,11 +182,21 @@ function CompileCSV(data) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // TOASTY - NOTIFICATION LOGIC
 const notificationToast = bootstrap.Toast.getOrCreateInstance(document.getElementById('noticeToast'), { delay: 3000 });
+const errorToast = bootstrap.Toast.getOrCreateInstance(document.getElementById('errorToast'), { delay: 3000 });
 
-function ShowNotification(msg) {
-    const toastBody = document.getElementById('toast-body');
+
+function ShowNotification(msg, error) {
+    var tb = (error ?? false) ? 'etoast-body' : 'toast-body';
+    const toastBody = document.getElementById(tb);
     toastBody.innerHTML = msg;
-    notificationToast.show();
+
+    // DISPLAY TOAST NOTICE
+    if (error ?? false) errorToast.show();
+    else notificationToast.show();
+    
+    // LOG TO CONSOLE
+    if (error ?? false) console.log(msg);
+    else console.warn(msg);    
 }
 
 function ShowModalMessage(datetime, system, status, message) {

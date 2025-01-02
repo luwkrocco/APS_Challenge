@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using System.Alerts.Monitor.Common;
 using System.Alerts.Monitor.Dashboard.DAL;
 using System.Alerts.Monitor.Dashboard.UI.Models;
 
 namespace System.Alerts.Monitor.Dashboard.UI.Controllers
 {
-    public class DashboardController(DALController controller, ILogger<DashboardController> logger) : Controller
+    public class DashboardController(DALController controller, BasicLogToFile logger) : Controller
     {
-        private readonly ILogger<DashboardController> _logger = logger;
+        private readonly BasicLogToFile _logger = logger;
         private readonly DALController _controller = controller;
 
         private MonitoringData _data { get; set; } = new();
@@ -20,8 +21,9 @@ namespace System.Alerts.Monitor.Dashboard.UI.Controllers
                 _data.AlertData = results.SystemAlerts;
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogException(ex).RunSynchronously();
                 throw;
             }
         }
@@ -40,8 +42,12 @@ namespace System.Alerts.Monitor.Dashboard.UI.Controllers
                 _data.SystemName = string.IsNullOrEmpty(filter.SystemName) ? _data.SystemName : filter.SystemName;
 
                 return (RefreshData()) ? Json(_data) : Json(null);
-            }//try
-            catch { throw; }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogException(ex).RunSynchronously();
+                throw; 
+            }
         }
     }
 }
