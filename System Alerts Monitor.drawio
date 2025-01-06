@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 OPR/114.0.0.0" version="25.0.3">
+  <diagram name="Page-1" id="ReNJk7NX-_TtPisOy264">
+    <mxGraphModel dx="1393" dy="763" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-1" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="425" y="80" width="415" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-2" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="80" width="385" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-3" value="Backend" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-4" value="Frontend" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="460" y="100" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-5" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="60" y="180" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-6" value="Data Store&lt;div&gt;(CSV)&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="270" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-7" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="152.5" y="140" width="217.5" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-8" value="System Alerts Provider" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="150" y="270" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-9" value="GRPC&lt;div&gt;Service&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="301.25" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-10" target="YaJswgmTLhJrF4u2VCsB-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-10" value="Data Access&lt;div&gt;Layer&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="161.25" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-11" target="YaJswgmTLhJrF4u2VCsB-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-11" value="Facade / Controller" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="231.5" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-12" value="GRPC Proto" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="231.25" y="230" width="128.75" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-10" target="YaJswgmTLhJrF4u2VCsB-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-18" target="YaJswgmTLhJrF4u2VCsB-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-18" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="140" width="217.5" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-20" value="User Interface" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="668.75" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-22" target="YaJswgmTLhJrF4u2VCsB-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-22" value="UI Data Provider" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="528.75" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shape=link;" edge="1" parent="1" source="YaJswgmTLhJrF4u2VCsB-24" target="YaJswgmTLhJrF4u2VCsB-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-24" value="UI Controller" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="599" y="160" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-27" value="System Alerts Monitor" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="320" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="YaJswgmTLhJrF4u2VCsB-28" value="System Alerts Dashboard" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="520" y="270" width="220" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
